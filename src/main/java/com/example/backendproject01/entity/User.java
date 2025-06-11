@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Builder
+@Builder // 객체를 생성할 때 체이닝 방식(각 메서드가 객체 자신(this)을 반환해서 다음 메서드를 바로 호출)으로 값을 설정하는 패턴
 public class User {
 
     @Id

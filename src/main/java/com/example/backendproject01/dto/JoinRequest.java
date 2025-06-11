@@ -13,11 +13,14 @@ public class JoinRequest {
     private String loginId;
     private String password;
     private String passwordCheck;
+    private String name;
 
+    // DTO를 Entity로 변환하는 메서드
     public User toEntity(String encodedPassword) {
         return User.builder()
                 .loginId(loginId)
                 .password(encodedPassword)
+                .name(name)
                 .build();
     }
 
