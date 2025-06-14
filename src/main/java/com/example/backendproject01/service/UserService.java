@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
+@RequiredArgsConstructor // @RequiredArgsConstructor는 final 필드만 생성자에 포함, Spring이 생성자 호출 시 이미 주입완료
 public class UserService {
 
     // final 써야하는 이유, 불변성(안전), nullpoint예외 방지(의존성주입 보장 - 생성자 생성)
