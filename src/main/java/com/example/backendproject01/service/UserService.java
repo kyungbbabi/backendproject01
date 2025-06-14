@@ -1,20 +1,20 @@
 package com.example.backendproject01.service;
 
 import com.example.backendproject01.dto.JoinRequest;
-import com.example.backendproject01.entity.User;
 import com.example.backendproject01.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    // final 써야하는 이유, 불변성(안전), nullpoint예외 방지(의존성주입 보장 - 생성자 생성)
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     /** 회원가입 때 loginId 중복 체크, 중복 시 true return */
     public boolean checkLoginIdDuplicate(String loginId) {
