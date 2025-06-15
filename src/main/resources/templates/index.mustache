@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메인 페이지</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .user-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+    </style>
+</head>
+<body>
+<h1>{{siteName}}</h1>
+
+{{#loginUser}}
+    <div class="user-info">
+        <h2>환영합니다, {{name}}님!</h2>
+        <p>아이디: {{loginId}}</p>
+        <p>로그인 상태: 접속 중</p>
+    </div>
+
+    <a href="/logout" class="btn btn-secondary">로그아웃</a>
+{{/loginUser}}
+
+{{^loginUser}}
+    <p>로그인이 필요합니다.</p>
+    <a href="/login" class="btn btn-primary">로그인</a>
+    <a href="/join" class="btn btn-secondary">회원가입</a>
+{{/loginUser}}
+</body>
+</html>
