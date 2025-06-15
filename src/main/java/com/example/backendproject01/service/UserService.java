@@ -1,6 +1,8 @@
 package com.example.backendproject01.service;
 
 import com.example.backendproject01.dto.JoinRequest;
+import com.example.backendproject01.dto.LoginRequest;
+import com.example.backendproject01.entity.User;
 import com.example.backendproject01.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,10 +25,26 @@ public class UserService {
 
     /** requset.toEntity()로 DTO(JoinRequest)에서 Entity(User)로 변환후 저장*/
     public void join(JoinRequest request){
+
+        // 1. 중복 아이디 검사
+        if (userRepository.existsByLoginId(request.getLoginId())) {
+            throw new IllegalArgumentException("이미 사용중인 아이디입니다.");
+        }
+
         userRepository.save(request.toEntity(bCryptPasswordEncoder.encode(request.getPassword())));
     }
 
+    public User login(LoginRequest request) {
 
+        User user = userRepository.findByLoginId(request.getLoginId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
+        if (!bCryptPasswordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw  new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        return user;
+
+    }
 
 
 }
