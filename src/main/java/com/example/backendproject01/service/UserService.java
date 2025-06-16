@@ -36,6 +36,7 @@ public class UserService {
 
     public User login(LoginRequest request) {
 
+        // IllegalArgumentException은 입력값 검증에 특화된 구체적인 예외, RuntimeException은 넓은 범위라 잘 안씀
         User user = userRepository.findByLoginId(request.getLoginId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
         if (!bCryptPasswordEncoder.matches(request.getPassword(), user.getPassword())) {

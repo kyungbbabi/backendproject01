@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@Controller
-@RequiredArgsConstructor
-@RequestMapping("/")
+@Controller // Spring이 웹 요청을 처리할 수 있도록 Bean으로 등록, 기본적으로 View 이름을 반환, @RestController는 JSON 반환
+@RequiredArgsConstructor // 의존성 주입을 위한 생성자 자동 생성, 없다면 직접 생성자를 생성해야 함
+@RequestMapping("/") // URL 경로의 공통 부분을 한 곳에서 관리
 public class SessionLoginController {
 
     private final UserService userService;
@@ -33,6 +33,7 @@ public class SessionLoginController {
 
     }
 
+    // 로그인 아이디 중복 부분 체크해보기!!!
     @PostMapping("/join")
     public String join(JoinRequest joinRequest, BindingResult bindingResult, Model model) {
 
@@ -67,6 +68,7 @@ public class SessionLoginController {
 
     @PostMapping("/login")
     public String login(LoginRequest loginRequest, HttpServletRequest httpServletRequest){
+
         try {
             // 1️⃣ 로그인 검증 및 사용자 정보 가져오기, UserService에서 아이디/비밀번호 확인 후 User 객체 반환
             User user = userService.login(loginRequest);
@@ -80,6 +82,12 @@ public class SessionLoginController {
         } catch (Exception e) {
             return "/login";
         }
+
+        /** session 파기
+         * session.invalidate();  // 세션 전체 삭제
+         * session.removeAttribute("user");  // 특정 데이터만 삭제
+         * session.setMaxInactiveInterval(30 * 60);  // 30분 후 자동 만료
+         * */
 
     }
 
