@@ -15,10 +15,16 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/memo")
+@RequestMapping("/memosession")
 public class MemoSessionController {
 
     private final MemoSessionService memoSessionServiceService;
+
+    /** 세션에서 사용자 정보 추출하는 공통 메서드 */
+//    private User getLoginUser(HttpServletRequest request) {
+//        HttpSession session = request.getSession();
+//        return (User) session.getAttribute("user");
+//    }
 
     @GetMapping
     public String memoList(HttpServletRequest request) {
