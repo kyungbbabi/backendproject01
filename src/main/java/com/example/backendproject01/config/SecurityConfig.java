@@ -18,10 +18,26 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/join", "/login").permitAll()
-        )
-                .csrf(csrf -> csrf.disable());
+
+        http
+                .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/", "/join", "/login").permitAll()
+                    .requestMatchers("/memo/**").authenticated()
+                    .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/memo")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/")
+                        .permitAll()
+                )
+                .sessionManagement(session -> session
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false)
+                );
 
                 return http.build();
 
