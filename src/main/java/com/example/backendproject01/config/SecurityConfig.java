@@ -28,9 +28,9 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/", "/join", "/login").permitAll()
+                    .requestMatchers("/", "/join", "/login").permitAll()    // 지정한 경로(requestMatchers(...))는 인증 없이 접근 허용(permitAll())
                     .requestMatchers("/memo/**").authenticated()
-                    .anyRequest().authenticated()
+                    .anyRequest().authenticated()                                 // 모든 요청(anyRequest())은 인증된 사용자(authenticated())만 접근 가능
                 )
                 .formLogin(form -> form
                         .loginPage("/login")            // Get -> 로그인 폼 페이지 보여주기
@@ -47,8 +47,8 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .sessionManagement(session -> session
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false)
+                        .maximumSessions(1)                 // 동일한 계정으로 중복 로그인하면 기존 세션을 만료시키거나 거부
+                        .maxSessionsPreventsLogin(false)    // 기존 세션이 있더라도 새로운 로그인은 허용하고 기존 세션을 만료
                 )
                 .csrf(csrf -> csrf.disable());
 
