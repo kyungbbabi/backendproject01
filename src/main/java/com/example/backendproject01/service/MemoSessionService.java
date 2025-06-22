@@ -2,6 +2,7 @@ package com.example.backendproject01.service;
 
 import com.example.backendproject01.dto.MemoRequest;
 import com.example.backendproject01.entity.Memo;
+import com.example.backendproject01.entity.User;
 import com.example.backendproject01.repository.MemoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,8 +31,8 @@ public class MemoSessionService {
     }
 
     /** 새 메모 작성 */
-    public Memo createMemo(MemoRequest request) {
-        return memoRepository.save(request.toEntity());
+    public Memo createMemo(MemoRequest request, User author) {
+        return memoRepository.save(request.toEntity(author));
     }
 
     /** 메모 세부내용 */
