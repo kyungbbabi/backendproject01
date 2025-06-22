@@ -19,6 +19,11 @@ public class PrincipalDetails implements UserDetails {
         this.user = user;
     }
 
+    //
+    public User getUser() {
+        return user;
+    }
+
     /** 권한 관련 작업, 여기서는 admin 이 없음*/
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
