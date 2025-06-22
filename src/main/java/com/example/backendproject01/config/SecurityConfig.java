@@ -2,6 +2,7 @@ package com.example.backendproject01.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
  * */
 @Configuration
 @EnableWebSecurity
+@Profile("!jwt") // JWT 프로필이 아닐 때만 활성화
 public class SecurityConfig {
 
     @Bean
