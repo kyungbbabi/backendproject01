@@ -44,7 +44,7 @@ public class JwtTokenUtil {
         if (userDetails instanceof PrincipalDetails) { // userDetails 객체가 PrincipalDetails 타입이면 true, 아니면 false를 반환.
             PrincipalDetails principalDetails = (PrincipalDetails) userDetails;
             claims.put("userId", principalDetails.getUser().getId());
-            claims.put("name", principalDetails.getUsername().getName());
+            claims.put("name", principalDetails.getUser().getName());
         }
 
         return createToken(claims, userDetails.getUsername());
