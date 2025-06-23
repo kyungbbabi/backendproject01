@@ -7,6 +7,7 @@ import com.example.backendproject01.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller // Spring이 웹 요청을 처리할 수 있도록 Bean으로 등록, 기본적으로 View 이름을 반환, @RestController는 JSON 반환
 @RequiredArgsConstructor // 의존성 주입을 위한 생성자 자동 생성, 없다면 직접 생성자를 생성해야 함
 @RequestMapping("/") // URL 경로의 공통 부분을 한 곳에서 관리
+@Profile("!jwt")
 public class SessionLoginController {
 
     private final UserService userService;
