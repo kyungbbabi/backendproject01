@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 메모 - JWT 메모 앱</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-info {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .search-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .memo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .memo-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .memo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .memo-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .memo-subtitle {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .memo-content {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .memo-content.expanded {
+            max-height: none;
+        }
+
+        .memo-content::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 30px;
+            width: 100%;
+            background: linear-gradient(transparent, white);
+            pointer-events: none;
+        }
+
+        .memo-content.expanded::after {
+            display: none;
+        }
+
+        .memo-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .memo-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .empty-state h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .empty-state p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .memo-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 헤더 섹션 -->
+    <div class="header">
+        <div>
+            <h1>📝 내 메모</h1>
+            <div class="user-info" id="userInfo">
+                <span id="userName">사용자</span>님의 메모장
+                <span id="memoCount">(0개)</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="#" onclick="showCreateModal()" class="btn btn-primary">
+                ➕ 새 메모 작성
+            </a>
+            <button onclick="logout()" class="btn btn-secondary">
+                🚪 로그아웃
+            </button>
+        </div>
+    </div>
+
+    <!-- 검색 섹션 -->
+    <div class="search-section">
+        <div class="search-form">
+            <input type="text" id="searchInput" class="search-input" placeholder="메모 제목이나 내용으로 검색...">
+            <button onclick="searchMemos()" class="btn btn-primary">🔍 검색</button>
+            <button onclick="clearSearch()" class="btn btn-secondary">전체보기</button>
+        </div>
+    </div>
+
+    <!-- 알림 영역 -->
+    <div id="alert" style="display: none;"></div>
+
+    <!-- 로딩 영역 -->
+    <div id="loading" class="loading" style="display: none;">
+        📡 메모를 불러오는 중...
+    </div>
+
+    <!-- 메모 목록 -->
+    <div id="memoGrid" class="memo-grid">
+        <!-- 메모 카드들이 JavaScript로 여기에 추가됩니다 -->
+    </div>
+
+    <!-- 빈 상태 -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+        <h3>📝 첫 번째 메모를 작성해보세요!</h3>
+        <p>아직 작성된 메모가 없습니다. 새 메모를 작성하여 시작해보세요.</p>
+        <button onclick="showCreateModal()" class="btn btn-primary">
+            ✍️ 첫 메모 작성하기
+        </button>
+    </div>
+</div>
+
+<!-- 메모 작성/수정 모달 -->
+<div id="memoModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle">📝 새 메모 작성</h2>
+        <form id="memoForm">
+            <input type="hidden" id="memoId">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="title" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">제목</label>
+                <input type="text" id="title" required style="width: 100%; padding: 0.8rem; border: 2px solid #e9ecef; border-radius: 8px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="subtitle" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">부제목</label>
+                <input type="text" id="subtitle" style="width: 100%; padding: 0.8rem; border: 2px solid #e9ecef; border-radius: 8px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="content" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">내용</label>
+                <textarea id="content" required rows="5" style="width: 100%; padding: 0.8rem; border: 2px solid #e9ecef; border-radius: 8px; resize: vertical;"></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" onclick="closeModal()" class="btn btn-secondary">취소</button>
+                <button type="submit" class="btn btn-primary" id="submitBtn">저장</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 메모 상세보기 모달 -->
+<div id="viewModal" class="modal">
+    <div class="modal-content" style="max-width: 700px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2 id="viewTitle">메모 제목</h2>
+            <div>
+                <button onclick="editMemo()" class="btn btn-primary btn-small" id="editBtn">✏️ 수정</button>
+                <button onclick="deleteMemo()" class="btn btn-danger btn-small" id="deleteBtn">🗑️ 삭제</button>
+                <button onclick="closeViewModal()" class="btn btn-secondary btn-small">✕</button>
+            </div>
+        </div>
+        <div id="viewSubtitle" style="color: #666; margin-bottom: 1rem; font-size: 1.1rem;"></div>
+        <div id="viewContent" style="line-height: 1.6; margin-bottom: 1rem; white-space: pre-wrap;"></div>
+        <div id="viewMeta" style="color: #999; font-size: 0.9rem; border-top: 1px solid #eee; padding-top: 1rem;"></div>
+    </div>
+</div>
+
+<script>
+    let currentMemos = [];
+    let currentMemoId = null;
+
+    // 페이지 로드 시 실행
+    window.onload = function() {
+        checkAuthAndLoadData();
+    };
+
+    // 인증 확인 및 데이터 로드
+    async function checkAuthAndLoadData() {
+        const token = localStorage.getItem('jwtToken');
+
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            // 사용자 정보 및 메모 목록 로드
+            await loadUserInfo();
+            await loadMemos();
+        } catch (error) {
+            console.error('데이터 로드 실패:', error);
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/login';
+        }
+    }
+
+    // 사용자 정보 로드
+    async function loadUserInfo() {
+        const token = localStorage.getItem('jwtToken');
+
+        // JWT 토큰에서 사용자 정보 추출 (간단한 방법)
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            document.getElementById('userName').textContent = payload.name || '사용자';
+        } catch (error) {
+            console.error('토큰 파싱 실패:', error);
+        }
+    }
+
+    // 메모 목록 로드
+    async function loadMemos() {
+        showLoading(true);
+
+        try {
+            const token = localStorage.getItem('jwtToken');
+            const response = await fetch('/api/memo', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (response.ok) {
+                const memos = await response.json();
+                currentMemos = memos;
+                displayMemos(memos);
+                updateMemoCount(memos.length);
+            } else {
+                throw new Error('메모 로드 실패');
+            }
+        } catch (error) {
+            showAlert('메모를 불러오는 중 오류가 발생했습니다.', 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // 메모 목록 화면에 표시
+    function displayMemos(memos) {
+        const memoGrid = document.getElementById('memoGrid');
+        const emptyState = document.getElementById('emptyState');
+
+        if (memos.length === 0) {
+            memoGrid.style.display = 'none';
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        emptyState.style.display = 'none';
+        memoGrid.style.display = 'grid';
+
+        memoGrid.innerHTML = memos.map(memo => `
+            <div class="memo-card">
+                <div class="memo-title" onclick="viewMemo(${memo.id})">${escapeHtml(memo.title)}</div>
+                ${memo.subtitle ? `<div class="memo-subtitle">${escapeHtml(memo.subtitle)}</div>` : ''}
+                <div class="memo-content">${escapeHtml(memo.content)}</div>
+                <div class="memo-meta">
+                    <span>📅 ${memo.formattedCreatedAt}</span>
+                    ${memo.updatedAt !== memo.createdAt ? `<span>✏️ ${memo.formattedUpdatedAt}</span>` : ''}
+                </div>
+                <div class="memo-actions">
+                    ${memo.permissions?.canEdit ? `<button onclick="editMemoById(${memo.id})" class="btn btn-primary btn-small">✏️ 수정</button>` : ''}
+                    ${memo.permissions?.canDelete ? `<button onclick="deleteMemoById(${memo.id})" class="btn btn-danger btn-small">🗑️ 삭제</button>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // 메모 개수 업데이트
+    function updateMemoCount(count) {
+        document.getElementById('memoCount').textContent = `(${count}개)`;
+    }
+
+    // 메모 검색
+    async function searchMemos() {
+        const keyword = document.getElementById('searchInput').value.trim();
+
+        if (keyword === '') {
+            displayMemos(currentMemos);
+            return;
+        }
+
+        showLoading(true);
+
+        try {
+            const token = localStorage.getItem('jwtToken');
+            const response = await fetch(`/api/memo/search?keyword=${encodeURIComponent(keyword)}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (response.ok) {
+                const memos = await response.json();
+                displayMemos(memos);
+                showAlert(`"${keyword}" 검색 결과: ${memos.length}개`, 'success');
+            } else {
+                throw new Error('검색 실패');
+            }
+        } catch (error) {
+            showAlert('검색 중 오류가 발생했습니다.', 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // 검색 초기화
+    function clearSearch() {
+        document.getElementById('searchInput').value = '';
+        displayMemos(currentMemos);
+    }
+
+    // Enter 키로 검색
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchMemos();
+        }
+    });
+
+    // 새 메모 작성 모달 표시
+    function showCreateModal() {
+        currentMemoId = null;
+        document.getElementById('modalTitle').textContent = '📝 새 메모 작성';
+        document.getElementById('memoForm').reset();
+        document.getElementById('memoModal').style.display = 'block';
+    }
+
+    // 메모 수정 모달 표시
+    function editMemoById(id) {
+        const memo = currentMemos.find(m => m.id === id);
+        if (!memo) return;
+
+        currentMemoId = id;
+        document.getElementById('modalTitle').textContent = '✏️ 메모 수정';
+        document.getElementById('title').value = memo.title;
+        document.getElementById('subtitle').value = memo.subtitle || '';
+        document.getElementById('content').value = memo.content;
+        document.getElementById('memoModal').style.display = 'block';
+    }
+
+    // 메모 상세보기
+    function viewMemo(id) {
+        const memo = currentMemos.find(m => m.id === id);
+        if (!memo) return;
+
+        currentMemoId = id;
+        document.getElementById('viewTitle').textContent = memo.title;
+        document.getElementById('viewSubtitle').textContent = memo.subtitle || '';
+        document.getElementById('viewContent').textContent = memo.content;
+        document.getElementById('viewMeta').innerHTML = `
+            <div>작성일: ${memo.formattedCreatedAt}</div>
+            ${memo.updatedAt !== memo.createdAt ? `<div>수정일: ${memo.formattedUpdatedAt}</div>` : ''}
+            <div>작성자: ${memo.author?.name || '알 수 없음'}</div>
+        `;
+
+        // 권한에 따라 버튼 표시/숨김
+        document.getElementById('editBtn').style.display = memo.permissions?.canEdit ? 'inline-block' : 'none';
+        document.getElementById('deleteBtn').style.display = memo.permissions?.canDelete ? 'inline-block' : 'none';
+
+        document.getElementById('viewModal').style.display = 'block';
+    }
+
+    // 상세보기에서 수정으로 이동
+    function editMemo() {
+        document.getElementById('viewModal').style.display = 'none';
+        editMemoById(currentMemoId);
+    }
+
+    // 메모 저장 (생성/수정)
+    document.getElementById('memoForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = '저장 중...';
+
+        const formData = {
+            title: document.getElementById('title').value.trim(),
+            subtitle: document.getElementById('subtitle').value.trim(),
+            content: document.getElementById('content').value.trim()
+        };
+
+        try {
+            const token = localStorage.getItem('jwtToken');
+            const url = currentMemoId ? `/api/memo/${currentMemoId}` : '/api/memo';
+            const method = currentMemoId ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                closeModal();
+                await loadMemos();
+                showAlert(currentMemoId ? '메모가 수정되었습니다.' : '새 메모가 작성되었습니다.', 'success');
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || '저장 실패');
+            }
+        } catch (error) {
+            showAlert('저장 중 오류가 발생했습니다: ' + error.message, 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
+    });
+
+    // 메모 삭제
+    async function deleteMemo() {
+        if (!currentMemoId) return;
+
+        if (!confirm('정말로 이 메모를 삭제하시겠습니까?')) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('jwtToken');
+            const response = await fetch(`/api/memo/${currentMemoId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (response.ok) {
+                closeViewModal();
+                await loadMemos();
+                showAlert('메모가 삭제되었습니다.', 'success');
+            } else {
+                throw new Error('삭제 실패');
+            }
+        } catch (error) {
+            showAlert('삭제 중 오류가 발생했습니다.', 'error');
+        }
+    }
+
+    // ID로 메모 삭제
+    async function deleteMemoById(id) {
+        currentMemoId = id;
+        await deleteMemo();
+    }
+
+    // 모달 닫기
+    function closeModal() {
+        document.getElementById('memoModal').style.display = 'none';
+        currentMemoId = null;
+    }
+
+    function closeViewModal() {
+        document.getElementById('viewModal').style.display = 'none';
+        currentMemoId = null;
+    }
+
+    // 모달 외부 클릭 시 닫기
+    window.onclick = function(event) {
+        const memoModal = document.getElementById('memoModal');
+        const viewModal = document.getElementById('viewModal');
+
+        if (event.target === memoModal) {
+            closeModal();
+        }
+        if (event.target === viewModal) {
+            closeViewModal();
+        }
+    };
+
+    // 로그아웃
+    function logout() {
+        if (confirm('로그아웃하시겠습니까?')) {
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/';
+        }
+    }
+
+    // 로딩 상태 표시
+    function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+
+    // 알림 메시지 표시
+    function showAlert(message, type) {
+        const alertDiv = document.getElementById('alert');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+        alertDiv.style.display = 'block';
+
+        setTimeout(() => {
+            alertDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    // HTML 이스케이프
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
+</body>
+</html>
