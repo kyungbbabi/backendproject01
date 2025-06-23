@@ -3,73 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>회원가입</title>
+    <title>회원가입 - JWT 메모 앱</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
             max-width: 400px;
-            margin: 50px auto;
-            padding: 20px;
+            width: 90%;
         }
+
+        h1 {
+            color: #333;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 2rem;
+        }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 1.5rem;
         }
+
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
         }
-        input[type="text"], input[type="password"] {
+
+        input {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
         }
-        button {
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
             width: 100%;
-            padding: 10px;
-            background-color: #007bff;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 10px;
+            font-size: 1.1rem;
             cursor: pointer;
+            transition: transform 0.3s ease;
+            margin-bottom: 1rem;
         }
-        button:hover {
-            background-color: #0056b3;
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
         }
-        .error {
-            color: red;
-            font-size: 14px;
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
     </style>
 </head>
 <body>
-<h1>회원가입</h1>
+<div class="container">
+    <h1>📝 회원가입</h1>
 
-<form method="post" action="/join">
-    <div class="form-group">
-        <label for="loginId">아이디</label>
-        <input type="text" id="loginId" name="loginId" placeholder="아이디를 입력하세요" required>
+    <div id="alert" style="display: none;"></div>
+
+    <form id="joinForm">
+        <div class="form-group">
+            <label for="loginId">아이디</label>
+            <input type="text" id="loginId" name="loginId" required>
+        </div>
+
+        <div class="form-group">
+            <label for="name">이름</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+
+        <div class="form-group">
+            <label for="passwordCheck">비밀번호 확인</label>
+            <input type="password" id="passwordCheck" name="passwordCheck" required>
+        </div>
+
+        <button type="submit" class="btn" id="joinBtn">회원가입</button>
+    </form>
+
+    <div class="link">
+        <p>이미 계정이 있으신가요? <a href="/login">로그인</a></p>
+        <p><a href="/">홈으로 돌아가기</a></p>
     </div>
+</div>
 
-    <div class="form-group">
-        <label for="password">비밀번호</label>
-        <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
-    </div>
+<script>
+    document.getElementById('joinForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-    <div class="form-group">
-        <label for="passwordCheck">비밀번호 확인</label>
-        <input type="password" id="passwordCheck" name="passwordCheck" placeholder="비밀번호를 다시 입력하세요" required>
-    </div>
+        const joinBtn = document.getElementById('joinBtn');
+        const alertDiv = document.getElementById('alert');
 
-    <div class="form-group">
-        <label for="name">이름</label>
-        <input type="text" id="name" name="name" placeholder="이름을 입력하세요" required>
-    </div>
+        // 클라이언트 사이드 유효성 검증
+        const password = document.getElementById('password').value;
+        const passwordCheck = document.getElementById('passwordCheck').value;
 
-    <button type="submit">회원가입</button>
-</form>
+        if (password !== passwordCheck) {
+            showAlert('비밀번호가 일치하지 않습니다.', 'error');
+            return;
+        }
 
-<p>이미 계정이 있으신가요? <a href="/login">로그인</a></p>
+        // 버튼 비활성화
+        joinBtn.disabled = true;
+        joinBtn.textContent = '가입 중...';
+
+        const formData = {
+            loginId: document.getElementById('loginId').value,
+            name: document.getElementById('name').value,
+            password: password,
+            passwordCheck: passwordCheck
+        };
+
+        try {
+            const response = await fetch('/api/join', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // 회원가입 성공
+                showAlert('회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.', 'success');
+
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+            } else {
+                // 회원가입 실패
+                showAlert(data.error || '회원가입에 실패했습니다.', 'error');
+            }
+        } catch (error) {
+            showAlert('서버 연결에 실패했습니다.', 'error');
+        } finally {
+            // 버튼 다시 활성화
+            joinBtn.disabled = false;
+            joinBtn.textContent = '회원가입';
+        }
+    });
+
+    function showAlert(message, type) {
+        const alertDiv = document.getElementById('alert');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+        alertDiv.style.display = 'block';
+
+        // 5초 후 자동으로 숨김
+        setTimeout(() => {
+            alertDiv.style.display = 'none';
+        }, 5000);
+    }
+</script>
 </body>
 </html>

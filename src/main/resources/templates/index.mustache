@@ -3,48 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>메인 페이지</title>
+    <title>JWT 메모 애플리케이션</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        .user-info {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
         }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
         .btn {
-            padding: 10px 20px;
-            margin: 5px;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
             text-decoration: none;
-            border-radius: 4px;
-            display: inline-block;
+            transition: all 0.3s ease;
+            min-width: 120px;
         }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-secondary { background-color: #6c757d; color: white; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .status {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .status.logged-in {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.logged-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
-<h1>{{siteName}}</h1>
+<div class="container">
+    <h1>🔐 JWT 메모 앱</h1>
+    <p>JWT 토큰 기반 인증으로 안전하게 메모를 관리하세요!</p>
 
-{{#loginUser}}
-    <div class="user-info">
-        <h2>환영합니다, {{name}}님!</h2>
-        <p>아이디: {{loginId}}</p>
-        <p>로그인 상태: 접속 중</p>
+    <div class="btn-group">
+        <a href="/login" class="btn btn-primary">로그인</a>
+        <a href="/join" class="btn btn-secondary">회원가입</a>
     </div>
 
-    <a href="/logout" class="btn btn-secondary">로그아웃</a>
-{{/loginUser}}
+    <div id="status" class="status logged-out">
+        <strong>상태:</strong> 로그인이 필요합니다
+    </div>
 
-{{^loginUser}}
-    <p>로그인이 필요합니다.</p>
-    <a href="/login" class="btn btn-primary">로그인</a>
-    <a href="/join" class="btn btn-secondary">회원가입</a>
-{{/loginUser}}
+    <div id="logged-in-actions" style="display: none; margin-top: 1rem;">
+        <a href="/memo" class="btn btn-primary">내 메모 보기</a>
+        <button onclick="logout()" class="btn btn-secondary">로그아웃</button>
+    </div>
+</div>
+
+<script>
+    // 페이지 로드 시 로그인 상태 확인
+    window.onload = function() {
+        checkLoginStatus();
+    };
+
+    function checkLoginStatus() {
+        const token = localStorage.getItem('jwtToken');
+        const statusDiv = document.getElementById('status');
+        const loggedInActions = document.getElementById('logged-in-actions');
+
+        if (token) {
+            // 토큰이 있으면 유효성 검증
+            fetch('/api/memo', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+                    .then(response => {
+                        if (response.ok) {
+                            statusDiv.className = 'status logged-in';
+                            statusDiv.innerHTML = '<strong>상태:</strong> 로그인됨 ✅';
+                            loggedInActions.style.display = 'block';
+                        } else {
+                            // 토큰이 유효하지 않음
+                            localStorage.removeItem('jwtToken');
+                            statusDiv.className = 'status logged-out';
+                            statusDiv.innerHTML = '<strong>상태:</strong> 로그인이 필요합니다';
+                        }
+                    })
+                    .catch(() => {
+                        localStorage.removeItem('jwtToken');
+                        statusDiv.className = 'status logged-out';
+                        statusDiv.innerHTML = '<strong>상태:</strong> 로그인이 필요합니다';
+                    });
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('jwtToken');
+        alert('로그아웃되었습니다.');
+        location.reload();
+    }
+</script>
 </body>
 </html>
