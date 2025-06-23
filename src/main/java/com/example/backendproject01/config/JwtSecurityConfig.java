@@ -38,8 +38,10 @@ public class JwtSecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/","/join","/login").permitAll()
                         .requestMatchers("/api/join", "/api/login").permitAll()
                         .requestMatchers("/api/memo/**").authenticated()
+                        .requestMatchers("/memo").authenticated()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
