@@ -7,9 +7,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 
 /**
-우리가 직접 로그인 처리를 안해도 되는 대신 지정해줘야 할 정보들 (ex.  /login 에 대한 요청을 security가 가로채서 로그인 진행, @PostMapping("/login") 을 만들지 않아도 됨)
-로그인에 성공 시 Security Session을 생성(Key값 : Security ContextHolder)
-Security Session(Authentication(UserDetails)) 이런 식의 구조로 되어있는데 PrincipalDetails에서 UserDetails를 설정해준다고 보면 됨
+ * Spring Security 사용자 정보 래퍼
+ * 우리가 직접 로그인 처리를 안해도 되는 대신 지정해줘야 할 정보들 (ex.  /login 에 대한 요청을 security가 가로채서 로그인 진행, @PostMapping("/login") 을 만들지 않아도 됨)
+ * 로그인에 성공 시 Security Session을 생성(Key값 : Security ContextHolder)
+ * Security Session(Authentication(UserDetails)) 이런 식의 구조로 되어있는데 PrincipalDetails 에서 UserDetails 를 설정해준다고 보면 됨
 */
 
 public class PrincipalDetails implements UserDetails {
@@ -30,13 +31,13 @@ public class PrincipalDetails implements UserDetails {
         return null;
     }
 
-    // get Password 메서드
+    // get Password 메서드, 암호화된 비밀번호 반환
     @Override
     public String getPassword() {
         return user.getPassword();
     }
 
-    // get Username 메서드()
+    // get Username 메서드(), 로그인ID 반환
     @Override
     public String getUsername() {
         return user.getLoginId();

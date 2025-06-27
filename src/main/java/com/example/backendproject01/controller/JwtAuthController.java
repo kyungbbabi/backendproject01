@@ -1,6 +1,7 @@
 package com.example.backendproject01.controller;
 
 import com.example.backendproject01.auth.JwtTokenUtil;
+import com.example.backendproject01.auth.PrincipalDetailService;
 import com.example.backendproject01.auth.PrincipalDetails;
 import com.example.backendproject01.dto.JoinRequest;
 import com.example.backendproject01.dto.LoginRequest;
@@ -24,8 +25,9 @@ import java.util.Map;
 public class JwtAuthController {
 
     private final UserService userService;
-    private final AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager; // 사용자 인증
     private final JwtTokenUtil jwtTokenUtil;
+    private final PrincipalDetailService principalDetailService;
 
     @PostMapping("/join")
     public ResponseEntity<?> join(@RequestBody JoinRequest joinRequest, BindingResult bindingResult) {
@@ -50,7 +52,7 @@ public class JwtAuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
 
         try {
-            // Spring Security를 통한 인증
+            // Spring Security를 통한 사용자 인증
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getLoginId(),
@@ -82,13 +84,36 @@ public class JwtAuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestHeader("Authorization") String token) {
         try {
-            String jwtToken = token.substring(7);                    // Bearer 토큰에서 실제 토큰 추출
-            String username = jwtTokenUtil.getUsernameFromToken(jwtToken);      // 토큰에서 사용자명 추출
+            if (token == null || !token.startsWith("Bearer ")) {
+                return ResponseEntity.badRequest().body(Map.of("error","유효하지 않은 토큰 형식입니다."));
+            }
 
-            // 새 토큰 생성을 위해 사용자 정보 조회 필요
-            // 이 부분은 PrincipalDetailService를 통해 처리해야 함
+            // 토큰이 기본적으로 유효한지 확인 (만료는 허용)
+            String jwtToken = token.substring(7);
+            String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+            if (username == null) {
+                return ResponseEntity.badRequest().body(Map.of("error","유효하지 않은 토큰입니다."));
+            }
 
-            return ResponseEntity.ok(Map.of("message", "토큰 갱신 기능은 추후 구현 예정"));
+            UserDetails userDetails = principalDetailService.loadUserByUsername(username);  // 사용자 정보 조회
+            String newToken = jwtTokenUtil.generateToken(userDetails);                      // 새 토큰 생성
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", newToken);
+            response.put("type", "Bearer");
+
+            if (userDetails instanceof PrincipalDetails) {
+                PrincipalDetails principalDetails = (PrincipalDetails) userDetails;
+                User user = principalDetails.getUser();
+                response.put("user", Map.of(
+                        "id", user.getId(),
+                        "loginId", user.getLoginId(),
+                        "name", user.getName()
+                ));
+            }
+
+            return ResponseEntity.ok(response);
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", "토큰 갱신에 실패했습니다."));
         }
