@@ -486,20 +486,20 @@
         document.getElementById('memoCount').textContent = `(${count}개)`;
     }
 
-    // 메모 검색
+    // 메모 검색 - 수정된 부분
     async function searchMemos() {
         const keyword = document.getElementById('searchInput').value.trim();
-
-        if (keyword === '') {
-            displayMemos(currentMemos);
-            return;
-        }
 
         showLoading(true);
 
         try {
             const token = localStorage.getItem('jwtToken');
-            const response = await fetch(`/api/memo/search?keyword=${encodeURIComponent(keyword)}`, {
+            // 검색 API 경로 수정: 기본 /api/memo 엔드포인트에 keyword 파라미터 추가
+            const url = keyword
+                    ? `/api/memo?keyword=${encodeURIComponent(keyword)}`
+                    : '/api/memo';
+
+            const response = await fetch(url, {
                 headers: {
                     'Authorization': 'Bearer ' + token
                 }
@@ -508,7 +508,10 @@
             if (response.ok) {
                 const memos = await response.json();
                 displayMemos(memos);
-                showAlert(`"${keyword}" 검색 결과: ${memos.length}개`, 'success');
+
+                if (keyword) {
+                    showAlert(`"${keyword}" 검색 결과: ${memos.length}개`, 'success');
+                }
             } else {
                 throw new Error('검색 실패');
             }
@@ -522,7 +525,7 @@
     // 검색 초기화
     function clearSearch() {
         document.getElementById('searchInput').value = '';
-        displayMemos(currentMemos);
+        loadMemos(); // 전체 메모 다시 로드
     }
 
     // Enter 키로 검색

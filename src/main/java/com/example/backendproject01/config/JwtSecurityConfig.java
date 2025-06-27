@@ -42,7 +42,7 @@ public class JwtSecurityConfig {
                         .requestMatchers("/","/join","/login").permitAll()
                         .requestMatchers("/api/join", "/api/login").permitAll()
                         .requestMatchers("/api/memo/**").authenticated()
-                        .requestMatchers("/memo").authenticated()
+                        .requestMatchers("/memo").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

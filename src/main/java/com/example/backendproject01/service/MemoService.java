@@ -35,6 +35,13 @@ public class MemoService {
                 .collect(Collectors.toList());
     }
 
+    /** 특정 메모 조회 (ID 기준) */
+    public MemoResponse getMemoById(Long id, User currentUser) {
+        Memo memo = memoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("메모를 찾을 수 없습니다: " + id));
+        return MemoResponse.from(memo, currentUser);
+    }
+
     /** 특정 사용자의 메모 목록 조회 (최신순) */
     public List<MemoResponse> getMemosByUser(User user) {
         List<Memo> memos = memoRepository.findByAuthorOrderByCreatedAtDesc(user);
@@ -46,22 +53,35 @@ public class MemoService {
 
     /** 전체 메모에서 키워드 검색 */
     public List<MemoResponse> searchMemos(String keyword) {
-
         // 키워드가 없으면 전체 목록 반환
         if (keyword == null || keyword.trim().isEmpty()) {
             return getAllMemos();
         }
         List<Memo> memos = memoRepository.findByKeyword(keyword.trim());
 
-        return memos.stream()                   // List<Memo>를 Stream<Memo>로 변환
-                .map(MemoResponse::from)        // 각 Memo 객체를 MemoResponse 객체로 변환 (메서드 참조 사용)
-                .collect(Collectors.toList());  // Stream을 다시 List로
+        return memos.stream()
+                .map(MemoResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    /** 특정 사용자의 메모에서 키워드 검색 */
+    public List<MemoResponse> searchMyMemos(String keyword, User user) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getMemosByUser(user);
+        }
+
+        // 사용자별 검색을 위한 Repository 메서드 사용
+        List<Memo> memos = memoRepository.findByKeywordAndAuthor(keyword.trim(), user);
+
+        return memos.stream()
+                .map(memo -> MemoResponse.from(memo, user))
+                .collect(Collectors.toList());
     }
 
     @Transactional
     public MemoResponse updateMemo(Long id, MemoRequest request, User currentUser) {
         Memo memo = memoRepository.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("메모를 찾을 수 없습니다: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("메모를 찾을 수 없습니다: " + id));
 
         if (!memo.canBeEditedBy(currentUser)) {
             throw new IllegalArgumentException("메모를 수정할 권한이 없습니다.");
@@ -83,11 +103,6 @@ public class MemoService {
         }
 
         memoRepository.deleteById(id);
-    }
-
-    /** 특정 사용자의 메모 개수 조회 */
-    public long getMemoCountByUser(User user) {
-        return memoRepository.countByAuthor(user);
     }
 
 }
